@@ -7,6 +7,8 @@ bchain currently supports the following platforms:
 2. Arm
 3. Darwin
 
+windows platform node is in developing, will coming soon...
+
 ## Bchaind
 
 bchaind is the bchain node program.
