@@ -1,0 +1,51 @@
+#include "sysApi.h"
+
+class system
+{
+public:
+    system() {}
+    void createContract(char *code);
+};
+
+void system::createContract(char *code)
+{
+    char contractAddr[48];
+    char sender[48];
+    action_sender(sender);
+    contract_create(sender, code, contractAddr);
+    int len = strlen(contractAddr);
+
+    stTopic topic;
+    topic.next = 0;
+    char *topicStr = "createContract";
+    topic.data = topicStr;
+    topic.data_len = strlen(topicStr);
+
+    stTopic topicAddr;
+    topicAddr.next = 0;
+    topicAddr.data = contractAddr;
+    topicAddr.data_len = len;
+
+    topic.next = &topicAddr;
+
+    stData logData;
+    logData.next = 0;
+    logData.data = contractAddr;
+    logData.data_len = len;
+
+    emitEvent(&topic, &logData);
+
+    setResult(contractAddr, len);
+}
+
+extern "C"
+{
+    static system s;
+    void createContract(char *code)
+    {
+        return s.createContract(code);
+    }
+}
+
+#define BCHAINIO_ABI(type, name)
+BCHAINIO_ABI(system, (createContract))

@@ -1,0 +1,409 @@
+#include "sysApi.h"
+
+static unsigned long long rewordsTbl[200] = {
+    200000000,
+    199600000,
+    199200800,
+    198802398,
+    198404793,
+    198007983,
+    197611967,
+    197216743,
+    196822310,
+    196428665,
+    196035808,
+    195643736,
+    195252449,
+    194861944,
+    194472220,
+    194083276,
+    193695109,
+    193307719,
+    192921104,
+    192535262,
+    192150191,
+    191765891,
+    191382359,
+    190999594,
+    190617595,
+    190236360,
+    189855887,
+    189476175,
+    189097223,
+    188719029,
+    188341591,
+    187964908,
+    187588978,
+    187213800,
+    186839372,
+    186465693,
+    186092762,
+    185720576,
+    185349135,
+    184978437,
+    184608480,
+    184239263,
+    183870784,
+    183503042,
+    183136036,
+    182769764,
+    182404224,
+    182039416,
+    181675337,
+    181311986,
+    180949362,
+    180587463,
+    180226288,
+    179865835,
+    179506103,
+    179147091,
+    178788797,
+    178431219,
+    178074357,
+    177718208,
+    177362772,
+    177008046,
+    176654030,
+    176300722,
+    175948121,
+    175596225,
+    175245033,
+    174894543,
+    174544754,
+    174195664,
+    173847273,
+    173499578,
+    173152579,
+    172806274,
+    172460661,
+    172115740,
+    171771509,
+    171427966,
+    171085110,
+    170742940,
+    170401454,
+    170060651,
+    169720530,
+    169381089,
+    169042327,
+    168704242,
+    168366834,
+    168030100,
+    167694040,
+    167358652,
+    167023935,
+    166689887,
+    166356507,
+    166023794,
+    165691746,
+    165360363,
+    165029642,
+    164699583,
+    164370184,
+    164041444,
+    163713361,
+    163385934,
+    163059162,
+    162733044,
+    162407578,
+    162082763,
+    161758597,
+    161435080,
+    161112210,
+    160789986,
+    160468406,
+    160147469,
+    159827174,
+    159507520,
+    159188505,
+    158870128,
+    158552388,
+    158235283,
+    157918812,
+    157602974,
+    157287768,
+    156973192,
+    156659246,
+    156345928,
+    156033236,
+    155721170,
+    155409728,
+    155098909,
+    154788711,
+    154479134,
+    154170176,
+    153861836,
+    153554112,
+    153247004,
+    152940510,
+    152634629,
+    152329360,
+    152024701,
+    151720652,
+    151417211,
+    151114377,
+    150812148,
+    150510524,
+    150209503,
+    149909084,
+    149609266,
+    149310047,
+    149011427,
+    148713404,
+    148415977,
+    148119145,
+    147822907,
+    147527261,
+    147232206,
+    146937742,
+    146643867,
+    146350579,
+    146057878,
+    145765762,
+    145474230,
+    145183282,
+    144892915,
+    144603129,
+    144313923,
+    144025295,
+    143737244,
+    143449770,
+    143162870,
+    142876544,
+    142590791,
+    142305609,
+    142020998,
+    141736956,
+    141453482,
+    141170575,
+    140888234,
+    140606458,
+    140325245,
+    140044595,
+    139764506,
+    139484977,
+    139206007,
+    138927595,
+    138649740,
+    138372441,
+    138095696,
+    137819505,
+    137543866,
+    137268778,
+    136994240,
+    136720252,
+    136446811,
+    136173917,
+    135901569,
+    135629766,
+    135358506,
+    135087789,
+    134817613,
+    134547978,
+    134278882};
+
+class bchain
+{
+public:
+    bchain() {}
+    void transfer(char *to, unsigned long long amount, char *memo);
+    void reword();
+    void transferFee(unsigned long long fee);
+    void balenceOf(char *addr);
+    void getSupply();
+    void getDecimals();
+    void getSymbol();
+    void getName();
+};
+
+static char *bcName = "B Chain Token";
+static char *bcSymbol = "BC";
+static unsigned long long bcSupply = 100000000;
+static unsigned int bcDecimals = 8;
+
+void bchain::transfer(char *to, unsigned long long amount, char *memo)
+{
+    assert(strlen(memo) < 32, "memo exceed");
+    char sender[48];
+    action_sender(sender);
+
+    char key[128];
+    int keyLen;
+    unsigned long long fromToken = 0;
+    keyLen = strjoint(bcSymbol, sender, key);
+    int len = db_get(key, keyLen, (char *)&fromToken);
+    assert(len == 8, "transfer get sender BC error");
+    assert(fromToken >= amount, "transfer insufficient BC");
+    fromToken -= amount;
+    db_set(key, keyLen, (char *)(&fromToken), 8);
+
+    char key_to[128];
+    int keyLen_to;
+    unsigned long long toToken = 0;
+    str2lower(to);
+    keyLen_to = strjoint(bcSymbol, to, key_to);
+    len = db_get(key_to, keyLen_to, (char *)&toToken);
+    toToken += amount;
+    db_set(key_to, keyLen_to, (char *)(&toToken), 8);
+}
+
+static unsigned long long getRewordsByNumber(unsigned long long rNumber)
+{
+    unsigned long long rewords;
+    if (rNumber == 1)
+    {
+        rewords = 1750000000000000;
+        return rewords;
+    }
+    if (rNumber >= 50000000)
+    {
+        rewords = 0;
+        return rewords;
+    }
+    unsigned long long idx = rNumber / 250000;
+    if (idx >= 200)
+    {
+        return 0;
+    }
+    rewords = rewordsTbl[idx];
+    return rewords;
+}
+
+static char *keyRewordsNumber = "_rNumber";
+static unsigned long long getCurRewordsNumber()
+{
+    unsigned long long rewordsNum = 0;
+    int keyLen = strlen(keyRewordsNumber);
+    db_get(keyRewordsNumber, keyLen, (char *)&rewordsNum);
+    rewordsNum++;
+    db_set(keyRewordsNumber, keyLen, (char *)(&rewordsNum), 8);
+    return rewordsNum;
+}
+
+void bchain::reword()
+{
+    requireRewordAuth();
+    char producer[48];
+    block_producer(producer);
+    unsigned long long rNumber = getCurRewordsNumber();
+
+    char key[128];
+    int keyLen;
+    unsigned long long producerBc = 0;
+    keyLen = strjoint(bcSymbol, producer, key);
+    int len = db_get(key, keyLen, (char *)&producerBc);
+
+    unsigned long long rewordBc = getRewordsByNumber(rNumber);
+    producerBc += rewordBc;
+    db_set(key, keyLen, (char *)(&producerBc), 8);
+}
+
+void bchain::transferFee(unsigned long long fee)
+{
+    assert(fee > 0, "transferFee fee is 0");
+    char producer[48];
+    block_producer(producer);
+    char sender[48];
+    action_sender(sender);
+
+    unsigned long long fromBc = 0;
+    char key_sender[128];
+    int keyLen_sender;
+    keyLen_sender = strjoint(bcSymbol, sender, key_sender);
+    int len = db_get(key_sender, keyLen_sender, (char *)&fromBc);
+    assert(len == 8, "transferFee get sender BC error");
+    assert(fromBc >= fee, "transferFee insufficient BC");
+    fromBc -= fee;
+    db_set(key_sender, keyLen_sender, (char *)(&fromBc), 8);
+
+    char keyPr[128];
+    int keyLenPr;
+    unsigned long long producerBc = 0;
+    keyLenPr = strjoint(bcSymbol, producer, keyPr);
+    len = db_get(keyPr, keyLenPr, (char *)&producerBc);
+    producerBc += fee;
+    db_set(keyPr, keyLenPr, (char *)(&producerBc), 8);
+}
+
+void bchain::balenceOf(char *addr)
+{
+    unsigned long long val = 0;
+    char key[128];
+    int keyLen;
+    str2lower(addr);
+    keyLen = strjoint(bcSymbol, addr, key);
+    db_get(key, keyLen, (char *)&val);
+    setResult((char *)&val, 8);
+}
+
+void bchain::getSupply()
+{
+    unsigned long long total_supply = bcSupply;
+    for (int i = 0; i < bcDecimals; i++)
+    {
+        total_supply *= 10;
+    }
+    setResult((char *)&total_supply, 8);
+}
+
+void bchain::getDecimals()
+{
+    setResult((char *)&bcDecimals, 4);
+}
+
+void bchain::getSymbol()
+{
+    setResult(bcSymbol, strlen(bcSymbol));
+}
+
+void bchain::getName()
+{
+    setResult(bcName, strlen(bcName));
+}
+
+extern "C"
+{
+    static bchain bc;
+    void transfer(char *to, unsigned long long amount, char *memo)
+    {
+        return bc.transfer(to, amount, memo);
+    }
+
+    void reword()
+    {
+        return bc.reword();
+    }
+
+    void transferFee(unsigned long long fee)
+    {
+        return bc.transferFee(fee);
+    }
+
+    void balenceOf(char *addr)
+    {
+        return bc.balenceOf(addr);
+    }
+
+    void getSupply()
+    {
+        return bc.getSupply();
+    }
+
+    void getDecimals()
+    {
+        return bc.getDecimals();
+    }
+
+    void getSymbol()
+    {
+        return bc.getSymbol();
+    }
+
+    void getName()
+    {
+        return bc.getName();
+    }
+}
+
+#define BCHAINIO_ABI(type, name)
+BCHAINIO_ABI(bchain, (transfer)(reword)(transferFee)(balenceOf)(getSupply)(getDecimals)(getSymbol)(getName))

@@ -1,0 +1,64 @@
+{
+    "actions": [
+        {
+            "name": "pledge",
+            "type": "pledge"
+        },
+        {
+            "name": "redeem",
+            "type": "redeem"
+        },
+        {
+            "name": "pledgeOf",
+            "type": "pledgeOf"
+        },
+        {
+            "name": "pledgeOfExt",
+            "type": "pledgeOfExt"
+        }
+    ],
+    "structs": [
+        {
+            "base": "",
+            "fields": [
+                {
+                    "name": "amount",
+                    "type": "uint64"
+                }
+            ],
+            "name": "pledge"
+        },
+        {
+            "base": "",
+            "fields": [
+                {
+                    "name": "amount",
+                    "type": "uint64"
+                }
+            ],
+            "name": "redeem"
+        },
+        {
+            "base": "",
+            "fields": [
+                {
+                    "name": "addr",
+                    "type": "char *"
+                }
+            ],
+            "name": "pledgeOf"
+        },
+        {
+            "base": "",
+            "fields": [
+                {
+                    "name": "addr",
+                    "type": "char *"
+                }
+            ],
+            "name": "pledgeOfExt"
+        }
+    ],
+    "types": [],
+    "version": "bchainio::abi/1.0"
+}

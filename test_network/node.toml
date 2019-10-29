@@ -1,0 +1,16 @@
+DataDir = "."
+KeyStoreDir = "keystore"
+HTTPHost = "localhost"
+HTTPPort = 8989
+HTTPModules = ["bchain", "personal", "txpool", "blockproducer"]
+
+[P2P]
+MaxPeers = 10
+NoDiscovery = false
+DiscoveryV5 = true
+DiscoveryV5Addr = ":36181"
+BootstrapNodes = []
+StaticNodes = ["bnode://883228a1fe585051bbc4f90d1f2fba088f4fa36b3de76e2adea7b88249d752965c2f22d65a8eb995cd6499efb5aa17187a4129ce2e10594039ea69ca6aaae83a@47.105.140.135:36180"]
+TrustedNodes = []
+ListenAddr = ":36180"
+EnableMsgEvents = false

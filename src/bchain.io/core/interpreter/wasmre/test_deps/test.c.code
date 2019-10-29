@@ -1,0 +1,198 @@
+#include "sysApi.h"
+/*
+extern "C" {
+    int strlen(char* in);
+}
+*/
+
+int strlen(char *str)
+{
+    int count = 0;
+    while (*str != '\0') {
+        count++;
+        str++;
+    }
+    return count;
+}
+
+class token
+{
+  public:
+    token() {}
+    void static create(char *symol, char *name, int decimals, int supply);
+    void transer(char *to, int amount);
+    int balenceOf(char *addr);
+};
+
+void token::create(char *symol, char *name, int decimals, int supply)
+{
+    db_emplace("symol", strlen("symol"), symol, strlen(symol));
+    db_emplace("name", strlen("name"), name, strlen(name));
+    int total_supply = supply;
+    for (int i = 0; i < decimals; i++) {
+        total_supply *= 10;
+    }
+    char sender[48];
+    action_sender(sender);
+    db_emplace(sender, strlen(sender), (char *)(&total_supply), 4);
+}
+void token::transer(char *to, int amount)
+{
+    char sender[48];
+    action_sender(sender);
+    int fromToken = 0;
+    int toToken = 0;
+    int len = db_get(sender, strlen(sender), (char *)&fromToken);
+    assert(len == 4, "error\n");
+    db_get(to, strlen(to), (char *)&toToken);
+    fromToken -= amount;
+    toToken += amount;
+    db_set(sender, strlen(sender), (char *)(&fromToken), 4);
+    db_set(to, strlen(to), (char *)(&toToken), 4);
+}
+int token::balenceOf(char *addr)
+{
+    int val = 0;
+    db_get(addr, strlen(addr), (char *)&val);
+    return val;
+}
+
+extern "C" {
+void create()
+{
+    token tk;
+    tk.create("xxb", "xxx", 2, 1000);
+}
+
+void transer(char *to, int amount)
+{
+    token tk;
+    tk.transer(to, amount);
+}
+
+int balenceOf(char *addr)
+{
+    token tk;
+    return tk.balenceOf(addr);
+}
+
+int test1(int in)
+{
+    int aa = 1;
+    int bb = 2;
+    log("hello world!\n");
+    bool isAddress = isHexAddress("0x2e68b0583021d78c122f719fc82036529a90571d");
+    if (isAddress) {
+	log("0x2e68b0583021d78c122f719fc82036529a90571d is a valid hex "
+	    "address\n");
+        return in + 1;
+    }
+    return aa + bb + in;
+}
+
+int testAssert1()
+{
+    assert(true, "test assert");
+    return 0;
+}
+void testAssert2() { assert(false, "test assert"); }
+
+void testCryotoApi()
+{
+    char *msg = "abcdefghi";
+
+    char sha1_ret[44];
+    char sha256_ret[66];
+    char sha512_ret[130];
+    sha1(msg, 9, sha1_ret);
+    log("sha1 ret: \n");
+    sha1_ret[42] = '\n';
+    sha1_ret[43] = 0;
+    log(sha1_ret);
+
+    sha256(msg, 9, sha256_ret);
+    log("sha256 ret: \n");
+    sha256_ret[64] = '\n';
+    sha256_ret[65] = 0;
+    log(sha256_ret);
+
+    sha512(msg, 9, sha512_ret);
+    log("sha512 ret: \n");
+    sha512_ret[128] = '\n';
+    sha512_ret[129] = 0;
+    log(sha512_ret);
+}
+
+// this function will not export
+static void testSha256()
+{
+    char *msg = "abcdefghi";
+    char sha256_ret[66];
+    sha256(msg, 9, sha256_ret);
+    log("sha256 ret: \n");
+    sha256_ret[64] = '\n';
+    sha256_ret[65] = 0;
+    log(sha256_ret);
+}
+void testStack()
+{
+    char *msg = "abcdefghi";
+    char sha1_ret[44] = {0};
+    sha1(msg, 9, sha1_ret);
+    log("sha1 ret: \n");
+    sha1_ret[42] = '\n';
+    sha1_ret[43] = 0;
+    log(sha1_ret);
+
+    testSha256();
+
+    log("sha1 ret: \n");
+    log(sha1_ret);
+}
+int varPara(char *fmt, ...) { return 1; }
+int testVarPara() { varPara("xx %d yy \n", 1, 2, 3, 4); }
+
+#define NULL 0
+void testEvent()
+{
+    stTopic topic1;
+    topic1.topic[0] = 1;
+    topic1.next = NULL;
+
+    stTopic topic2;
+    topic2.topic[0] = 2;
+    topic2.next = &topic1;
+
+    emitEvent(&topic2, NULL);
+}
+
+/********************************/
+// extern long long  block_number;
+
+long long block_number();
+
+long long testBlockNumber() { return 1 + block_number(); }
+int memTest()
+{
+    char *msg = "abcdefghi";
+    char sha1_ret[44];
+    memset(sha1_ret, 's', 43);
+    sha1_ret[42] = '\n';
+    sha1_ret[43] = 0;
+    log(sha1_ret);
+
+    memcpy(sha1_ret, msg, 9);
+    log(sha1_ret);
+
+    return memcmp(msg, sha1_ret, 9);
+}
+
+void loopForever()
+{
+    int a = 0;
+    while(1) {
+        a++;
+    }
+}
+
+}

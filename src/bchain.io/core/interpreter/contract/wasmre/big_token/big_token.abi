@@ -1,0 +1,184 @@
+{
+    "actions": [
+        {
+            "name": "create",
+            "type": "create"
+        },
+        {
+            "name": "transfer",
+            "type": "transfer"
+        },
+        {
+            "name": "issue",
+            "type": "issue"
+        },
+        {
+            "name": "balanceOf",
+            "type": "balanceOf"
+        },
+        {
+            "name": "getSupply",
+            "type": "getSupply"
+        },
+        {
+            "name": "getDecimals",
+            "type": "getDecimals"
+        },
+        {
+            "name": "getSymbol",
+            "type": "getSymbol"
+        },
+        {
+            "name": "getName",
+            "type": "getName"
+        }
+    ],
+    "structs": [
+        {
+            "base": "",
+            "fields": [
+                {
+                    "name": "sybmol",
+                    "type": "char *"
+                },
+                {
+                    "name": "name",
+                    "type": "char *"
+                },
+                {
+                    "name": "decimals",
+                    "type": "char *"
+                },
+                {
+                    "name": "supply",
+                    "type": "char *"
+                },
+                {
+                    "name": "isIssue",
+                    "type": "int"
+                },
+                {
+                    "name": "blkNumber",
+                    "type": "uint64"
+                },
+                {
+                    "name": "expiry",
+                    "type": "unsigned int"
+                }
+            ],
+            "name": "create"
+        },
+        {
+            "base": "",
+            "fields": [
+                {
+                    "name": "to",
+                    "type": "char *"
+                },
+                {
+                    "name": "amount",
+                    "type": "char *"
+                },
+                {
+                    "name": "symbol",
+                    "type": "char *"
+                },
+                {
+                    "name": "memo",
+                    "type": "char *"
+                },
+                {
+                    "name": "blkNumber",
+                    "type": "uint64"
+                },
+                {
+                    "name": "expiry",
+                    "type": "unsigned int"
+                }
+            ],
+            "name": "transfer"
+        },
+        {
+            "base": "",
+            "fields": [
+                {
+                    "name": "symbol",
+                    "type": "char *"
+                },
+                {
+                    "name": "amount",
+                    "type": "char *"
+                },
+                {
+                    "name": "memo",
+                    "type": "char *"
+                },
+                {
+                    "name": "blkNumber",
+                    "type": "uint64"
+                },
+                {
+                    "name": "expiry",
+                    "type": "unsigned int"
+                }
+            ],
+            "name": "issue"
+        },
+        {
+            "base": "",
+            "fields": [
+                {
+                    "name": "addr",
+                    "type": "char *"
+                },
+                {
+                    "name": "symbol",
+                    "type": "char *"
+                }
+            ],
+            "name": "balanceOf"
+        },
+        {
+            "base": "",
+            "fields": [
+                {
+                    "name": "symbol",
+                    "type": "char *"
+                }
+            ],
+            "name": "getSupply"
+        },
+        {
+            "base": "",
+            "fields": [
+                {
+                    "name": "symbol",
+                    "type": "char *"
+                }
+            ],
+            "name": "getDecimals"
+        },
+        {
+            "base": "",
+            "fields": [
+                {
+                    "name": "symbol",
+                    "type": "char *"
+                }
+            ],
+            "name": "getSymbol"
+        },
+        {
+            "base": "",
+            "fields": [
+                {
+                    "name": "symbol",
+                    "type": "char *"
+                }
+            ],
+            "name": "getName"
+        }
+    ],
+    "types": [],
+    "version": "bchainio::abi/1.0"
+}

@@ -1,0 +1,103 @@
+{
+    "actions": [
+        {
+            "name": "transfer",
+            "type": "transfer"
+        },
+        {
+            "name": "reword",
+            "type": "reword"
+        },
+        {
+            "name": "transferFee",
+            "type": "transferFee"
+        },
+        {
+            "name": "balenceOf",
+            "type": "balenceOf"
+        },
+        {
+            "name": "getSupply",
+            "type": "getSupply"
+        },
+        {
+            "name": "getDecimals",
+            "type": "getDecimals"
+        },
+        {
+            "name": "getSymbol",
+            "type": "getSymbol"
+        },
+        {
+            "name": "getName",
+            "type": "getName"
+        }
+    ],
+    "structs": [
+        {
+            "base": "",
+            "fields": [
+                {
+                    "name": "to",
+                    "type": "char *"
+                },
+                {
+                    "name": "amount",
+                    "type": "uint64"
+                },
+                {
+                    "name": "memo",
+                    "type": "char *"
+                }
+            ],
+            "name": "transfer"
+        },
+        {
+            "base": "",
+            "fields": [],
+            "name": "reword"
+        },
+        {
+            "base": "",
+            "fields": [
+                {
+                    "name": "fee",
+                    "type": "uint64"
+                }
+            ],
+            "name": "transferFee"
+        },
+        {
+            "base": "",
+            "fields": [
+                {
+                    "name": "addr",
+                    "type": "char *"
+                }
+            ],
+            "name": "balenceOf"
+        },
+        {
+            "base": "",
+            "fields": [],
+            "name": "getSupply"
+        },
+        {
+            "base": "",
+            "fields": [],
+            "name": "getDecimals"
+        },
+        {
+            "base": "",
+            "fields": [],
+            "name": "getSymbol"
+        },
+        {
+            "base": "",
+            "fields": [],
+            "name": "getName"
+        }
+    ],
+    "types": [],
+    "version": "bchainio::abi/1.0"
+}

@@ -1,0 +1,44 @@
+{
+    "actions": [
+        {
+            "name": "set",
+            "type": "set"
+        },
+        {
+            "name": "get",
+            "type": "get"
+        }
+    ],
+    "structs": [
+        {
+            "base": "",
+            "fields": [
+                {
+                    "name": "addr",
+                    "type": "char *"
+                },
+                {
+                    "name": "val",
+                    "type": "char *"
+                },
+                {
+                    "name": "val_len",
+                    "type": "int"
+                }
+            ],
+            "name": "set"
+        },
+        {
+            "base": "",
+            "fields": [
+                {
+                    "name": "addr",
+                    "type": "char *"
+                }
+            ],
+            "name": "get"
+        }
+    ],
+    "types": [],
+    "version": "bchainio::abi/1.0"
+}

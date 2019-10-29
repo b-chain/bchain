@@ -1,0 +1,205 @@
+#include "sysApi.h"
+
+static char *pledgePrefix = "pledge";
+static char *pledgeTotal = "_pledgeTotal";
+static char *pWeightTotal = "_totalWeight";
+
+static void addTotalPledge(unsigned long long amount)
+{
+    unsigned long long tPledge = 0;
+    int keyLen = strlen(pledgeTotal);
+    db_get(pledgeTotal, keyLen, (char *)&tPledge);
+    tPledge += amount;
+    db_set(pledgeTotal, keyLen, (char *)(&tPledge), 8);
+}
+
+static void addTotalWeight(unsigned long long weight)
+{
+    unsigned long long totalWeight = 0;
+    int keyLen = strlen(pWeightTotal);
+    db_get(pWeightTotal, keyLen, (char *)&totalWeight);
+    totalWeight += weight;
+    db_set(pWeightTotal, keyLen, (char *)(&totalWeight), 8);
+}
+
+static void subTotalPledge(unsigned long long amount)
+{
+    unsigned long long tPledge = 0;
+    int keyLen = strlen(pledgeTotal);
+    db_get(pledgeTotal, keyLen, (char *)&tPledge);
+    assert(amount < tPledge, "subTotalPledge amount >= tPledge");
+    tPledge -= amount;
+    db_set(pledgeTotal, keyLen, (char *)(&tPledge), 8);
+}
+
+static void subTotalWeight(unsigned long long weight)
+{
+    unsigned long long totalWeight = 0;
+    int keyLen = strlen(pWeightTotal);
+    db_get(pWeightTotal, keyLen, (char *)&totalWeight);
+    assert(weight < totalWeight, "subTotalWeight weight >= totalWeight");
+    totalWeight -= weight;
+    db_set(pWeightTotal, keyLen, (char *)(&totalWeight), 8);
+}
+
+static void pledge_s(char *addr, unsigned long long amount)
+{
+    char key[128];
+    unsigned long long pledgeAmout = 0;
+    int keyLen = strjoint(pledgePrefix, addr, key);
+    db_get(key, keyLen, (char *)&pledgeAmout);
+    unsigned long long oriWeight = getWeight(pledgeAmout);
+
+    pledgeAmout += amount;
+    db_set(key, keyLen, (char *)(&pledgeAmout), 8);
+    addTotalPledge(amount);
+
+    unsigned long long newWeight = getWeight(pledgeAmout);
+    addTotalWeight(newWeight - oriWeight);
+}
+
+
+static void redeem_s(char *addr, unsigned long long amount)
+{
+    char key[128];
+    unsigned long long pledgeAmout = 0;
+    int keyLen = strjoint(pledgePrefix, addr, key);
+    db_get(key, keyLen, (char *)&pledgeAmout);
+    assert(amount <= pledgeAmout, "reeem: pledge amount is not enough");
+    unsigned long long oriWeight = getWeight(pledgeAmout);
+
+    pledgeAmout -= amount;
+    db_set(key, keyLen, (char *)(&pledgeAmout), 8);
+    subTotalPledge(amount);
+
+    unsigned long long newWeight = getWeight(pledgeAmout);
+    subTotalWeight(oriWeight - newWeight);
+}
+
+class pledgePool
+{
+public:
+    pledgePool() {}
+    void pledge(unsigned long long amount);
+    void redeem(unsigned long long amount);
+    void pledgeOf(char *addr);
+    void pledgeOfExt(char *addr);
+};
+
+static char *bcTokenContractAddr = "0xb78f12Cb3924607A8BC6a66799e159E3459097e9";
+void pledgePool::pledge(unsigned long long amount)
+{
+    char sender[48];
+    action_sender(sender);
+    char pledgePoolAddr[48];
+    contract_address(pledgePoolAddr);
+
+    pledge_s(sender, amount);
+    stCallPara paraTo;
+    paraTo.type = TypeAddress;
+    paraTo.data = pledgePoolAddr;
+    paraTo.data_len = SysAddressLen;
+
+    stCallPara paraAmount;
+    paraAmount.type = TypeI64;
+    paraAmount.data = &amount;
+    paraAmount.data_len = 8;
+    paraAmount.next = 0;
+
+    char *memo = "pledge";
+    stCallPara paraMemo;
+    paraMemo.type = TypeAddress;
+    paraMemo.data = memo;
+    paraMemo.data_len = strlen(memo) + 1;
+    paraMemo.next = 0;
+
+    paraAmount.next = &paraMemo;
+    paraTo.next = &paraAmount;
+    action_callWithPara(bcTokenContractAddr, "transfer", &paraTo);
+}
+
+void pledgePool::redeem(unsigned long long amount)
+{
+    char sender[48];
+    action_sender(sender);
+
+    redeem_s(sender, amount);
+    stCallPara paraTo;
+    paraTo.type = TypeAddress;
+    paraTo.data = sender;
+    paraTo.data_len = SysAddressLen;
+
+    stCallPara paraAmount;
+    paraAmount.type = TypeI64;
+    paraAmount.data = &amount;
+    paraAmount.data_len = 8;
+    paraAmount.next = 0;
+
+    char *memo = "redeem";
+    stCallPara paraMemo;
+    paraMemo.type = TypeAddress;
+    paraMemo.data = memo;
+    paraMemo.data_len = strlen(memo) + 1;
+    paraMemo.next = 0;
+
+    paraAmount.next = &paraMemo;
+    paraTo.next = &paraAmount;
+    contract_callWithPara(bcTokenContractAddr, "transfer", &paraTo);
+}
+
+void pledgePool::pledgeOf(char *addr)
+{
+    unsigned long long val = 0;
+    char key[128];
+    int keyLen;
+    str2lower(addr);
+    keyLen = strjoint(pledgePrefix, addr, key);
+    db_get(key, keyLen, (char *)&val);
+    setResult((char *)&val, 8);
+}
+
+void pledgePool::pledgeOfExt(char *addr)
+{
+    unsigned long long val = 0;
+    char key[128];
+    int keyLen;
+    str2lower(addr);
+    keyLen = strjoint(pledgePrefix, addr, key);
+    db_get(key, keyLen, (char *)&val);
+    setResult((char *)&val, 8);
+
+    val = 0;
+    db_get(pledgeTotal, strlen(pledgeTotal), (char *)&val);
+    setResult((char *)&val, 8);
+
+    val = 0;
+    db_get(pWeightTotal, strlen(pWeightTotal), (char *)&val);
+    setResult((char *)&val, 8);
+}
+
+extern "C"
+{
+    static pledgePool pool;
+    void pledge(unsigned long long amount)
+    {
+        return pool.pledge(amount);
+    }
+
+    void redeem(unsigned long long amount)
+    {
+        return pool.redeem(amount);
+    }
+
+    void pledgeOf(char *addr)
+    {
+        return pool.pledgeOf(addr);
+    }
+
+    void pledgeOfExt(char *addr)
+    {
+        return pool.pledgeOfExt(addr);
+    }
+}
+
+#define BCHAINIO_ABI(type, name)
+BCHAINIO_ABI(pledgePool, (pledge)(redeem)(pledgeOf)(pledgeOfExt))

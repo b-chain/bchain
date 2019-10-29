@@ -1,0 +1,22 @@
+{
+    "actions": [
+        {
+            "name": "createContract",
+            "type": "createContract"
+        }
+    ],
+    "structs": [
+        {
+            "base": "",
+            "fields": [
+                {
+                    "name": "code",
+                    "type": "char *"
+                }
+            ],
+            "name": "createContract"
+        }
+    ],
+    "types": [],
+    "version": "bchainio::abi/1.0"
+}
